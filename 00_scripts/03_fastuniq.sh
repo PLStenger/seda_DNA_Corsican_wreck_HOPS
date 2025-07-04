@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=02_adapterremoval
+#SBATCH --job-name=03_fastuniq
 #SBATCH --ntasks=1
 #SBATCH -p smp
 #SBATCH --mem=250G
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL 
-#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/02_adapterremoval.err"
-#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/02_adapterremoval.out"
+#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/03_fastuniq.err"
+#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/03_fastuniq.out"
 
 INPUT="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/03_bbduk"
 OUTPUT="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/04_fastuniq"
@@ -19,24 +19,33 @@ conda activate fastuniq
 
 cd "$INPUT" || exit 1
 
-# Boucle sur les fichiers R1
-for R1 in clean_*_R1.fastq.gz; do
-    # En déduire le nom du sample sans suffixe
-    base=$(echo "$R1" | sed 's/_R1\.fastq\.gz//')
-    R2="${base}_R2.fastq.gz"
-    
-    # Vérifie que le fichier R2 existe
-    if [[ -f "$R2" ]]; then
+for R1_gz in clean_*_R1.fastq.gz; do
+    base=$(echo "$R1_gz" | sed 's/_R1\.fastq\.gz//')
+    R2_gz="${base}_R2.fastq.gz"
+
+    if [[ -f "$R2_gz" ]]; then
         echo "Traitement de la paire: $base"
-        
-        # Crée le fichier .list
-        listfile="${OUTPUT}/${base}.list"
-        echo -e "${INPUT}/${R1}\n${INPUT}/${R2}" > "$listfile"
-        
+
+        # Fichiers temporaires décompressés
+        R1_tmp="${TMP}/${base}_R1.fastq"
+        R2_tmp="${TMP}/${base}_R2.fastq"
+        listfile="${TMP}/${base}.list"
+
+        # Décompression
+        zcat "$INPUT/$R1_gz" > "$R1_tmp"
+        zcat "$INPUT/$R2_gz" > "$R2_tmp"
+
+        # Liste pour fastuniq
+        echo -e "$R1_tmp\n$R2_tmp" > "$listfile"
+
         # Lancer fastuniq
         fastuniq -i "$listfile" -t q \
             -o "${OUTPUT}/${base}_dedup_R1.fastq" \
             -p "${OUTPUT}/${base}_dedup_R2.fastq"
+
+        # Nettoyage fichiers temporaires
+        rm -f "$R1_tmp" "$R2_tmp" "$listfile"
+
     else
         echo "ATTENTION: fichier R2 manquant pour $base"
     fi
