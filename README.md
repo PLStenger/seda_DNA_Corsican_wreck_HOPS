@@ -12,3 +12,7 @@ First, open your terminal. Then, run these two command lines :
 ### Update the pipeline in local by :
 
     git pull
+
+### References :
+
+https://github.com/ZimmermannHH/BeringSea_shotgun_sequencing/
