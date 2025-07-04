@@ -19,6 +19,9 @@ conda activate fastuniq
 
 cd "$INPUT" || exit 1
 
+TMP="/tmp/fastuniq_tmp"
+mkdir -p "$TMP"
+
 for R1_gz in clean_*_R1.fastq.gz; do
     base=$(echo "$R1_gz" | sed 's/_R1\.fastq\.gz//')
     R2_gz="${base}_R2.fastq.gz"
@@ -26,24 +29,19 @@ for R1_gz in clean_*_R1.fastq.gz; do
     if [[ -f "$R2_gz" ]]; then
         echo "Traitement de la paire: $base"
 
-        # Fichiers temporaires décompressés
         R1_tmp="${TMP}/${base}_R1.fastq"
         R2_tmp="${TMP}/${base}_R2.fastq"
         listfile="${TMP}/${base}.list"
 
-        # Décompression
         zcat "$INPUT/$R1_gz" > "$R1_tmp"
         zcat "$INPUT/$R2_gz" > "$R2_tmp"
 
-        # Liste pour fastuniq
         echo -e "$R1_tmp\n$R2_tmp" > "$listfile"
 
-        # Lancer fastuniq
         fastuniq -i "$listfile" -t q \
             -o "${OUTPUT}/${base}_dedup_R1.fastq" \
             -p "${OUTPUT}/${base}_dedup_R2.fastq"
 
-        # Nettoyage fichiers temporaires
         rm -f "$R1_tmp" "$R2_tmp" "$listfile"
 
     else
