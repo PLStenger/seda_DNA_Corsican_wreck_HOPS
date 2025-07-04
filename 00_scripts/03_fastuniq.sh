@@ -8,32 +8,38 @@
 #SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/02_adapterremoval.err"
 #SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/02_adapterremoval.out"
 
-WORKING_DIRECTORY="/home/plstenge/seda_DNA_Corsican_wreck/01_raw_data"
-OUTPUT="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/03_cleaned_data_adapterremoval"
-ADAPTER_FILE="/home/plstenge/seda_DNA_Corsican_wreck/99_softwares/adapters_adpateremoval.txt"
+INPUT="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/03_bbduk"
+OUTPUT="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/04_fastuniq"
 
 mkdir -p "$OUTPUT"
 
 module load conda/4.12.0
 source ~/.bashrc
-conda activate adapterremoval
+conda activate fastuniq
 
-cd "$WORKING_DIRECTORY"
+cd "$INPUT" || exit 1
 
-# Boucle 1: Démultiplexage et trimming/collapse pour chaque échantillon
-for r1_file in *_R1.fastq.gz; do
-    r2_file="${r1_file/_R1/_R2}"
-    [[ ! -f "$r2_file" ]] && { echo "ERREUR: Fichier R2 manquant pour $r1_file" >&2; continue; }
-    base_name="${r1_file%%_R1.fastq.gz}"
-    AdapterRemoval \
-        --adapter-list "$ADAPTER_FILE" \
-        --file1 "$r1_file" \
-        --file2 "$r2_file" \
-        --basename "$OUTPUT/${base_name}_demux" \
-        --trimns \
-        --trimqualities \
-        --minlength 25 \
-        --qualitymax 50 \
-        --collapse \
-        --gzip
+# Boucle sur les fichiers R1
+for R1 in clean_*_R1.fastq.gz; do
+    # En déduire le nom du sample sans suffixe
+    base=$(echo "$R1" | sed 's/_R1\.fastq\.gz//')
+    R2="${base}_R2.fastq.gz"
+    
+    # Vérifie que le fichier R2 existe
+    if [[ -f "$R2" ]]; then
+        echo "Traitement de la paire: $base"
+        
+        # Crée le fichier .list
+        listfile="${OUTPUT}/${base}.list"
+        echo -e "${INPUT}/${R1}\n${INPUT}/${R2}" > "$listfile"
+        
+        # Lancer fastuniq
+        fastuniq -i "$listfile" -t q \
+            -o "${OUTPUT}/${base}_dedup_R1.fastq" \
+            -p "${OUTPUT}/${base}_dedup_R2.fastq"
+    else
+        echo "ATTENTION: fichier R2 manquant pour $base"
+    fi
 done
+
+echo "Terminé."
