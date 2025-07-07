@@ -31,20 +31,24 @@ conda activate kraken2
 # mv pdb.accession2taxid /home/plstenge/nt_kraken2_db/taxonomy/
 # mv dead_nucl.accession2taxid /home/plstenge/nt_kraken2_db/taxonomy/
 
-mkdir /home/plstenge/nt_kraken2_db_big
-cd /home/plstenge/nt_kraken2_db_big
+# Créer dossier local
+mkdir -p /home/plstenge/nt_kraken2_db_big
+mkdir -p /home/plstenge/nt_kraken2_db_parts
 
-cp /storage/biodatabanks/ncbi/NT/ncbi_blast_nt_2024-8-24/fasta/All/all.fasta /home/plstenge/nt_kraken2_db_big/
-echo "cp ok"
+# Diviser le FASTA en 10 fichiers
+seqkit split -p 10 /storage/biodatabanks/ncbi/NT/ncbi_blast_nt_2024-8-24/fasta/All/all.fasta -O /home/plstenge/nt_kraken2_db_parts/
 
-kraken2-build --add-to-library /home/plstenge/nt_kraken2_db_big/all.fasta --db /home/plstenge/nt_kraken2_db_big
-echo "add-to-library ok"
+# Ajouter chaque morceau à la base
+for f in /home/plstenge/nt_kraken2_db_parts/*.fasta; do
+  kraken2-build --add-to-library "$f" --db /home/plstenge/nt_kraken2_db_big
+done
 
+# Télécharger taxonomie
 kraken2-build --download-taxonomy --db /home/plstenge/nt_kraken2_db_big
-echo "download-taxonomy ok"
 
+# Construire la base
 kraken2-build --build --db /home/plstenge/nt_kraken2_db_big --threads 36
-echo "base de donnée construite"
+
 
 #kraken2-build --add-to-library /storage/biodatabanks/ncbi/NT/ncbi_blast_nt_2024-8-24/fasta/All/all.fasta --db /home/plstenge/nt_kraken2_db
 
