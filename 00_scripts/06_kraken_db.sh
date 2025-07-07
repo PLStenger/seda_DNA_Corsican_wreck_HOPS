@@ -42,6 +42,7 @@ cd /home/plstenge/nt_kraken2_db
 
 #echo "download-taxonomy ok"
 
-kraken2-build --build --db /home/plstenge/nt_kraken2_db --threads 36
+#kraken2-build --build --db /home/plstenge/nt_kraken2_db --threads 36
+kraken2-build --build --db /home/plstenge/nt_kraken2_db --threads 36 > build.log 2> build.err
 
 echo "base de donnée construite"
