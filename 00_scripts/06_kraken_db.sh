@@ -1,8 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=06_kraken_db
+##SBATCH --time=96:00:00       
 #SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8     
 #SBATCH -p smp
-#SBATCH --mem=250G
+#SBATCH --mem=1000G            
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL 
 #SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/06_kraken_db.err"
