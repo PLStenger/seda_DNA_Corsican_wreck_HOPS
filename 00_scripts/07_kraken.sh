@@ -8,9 +8,13 @@
 #SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/07_kraken.err"
 #SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/07_kraken.out"
 
+module load conda/4.12.0
+source ~/.bashrc
+conda activate kraken2
+
 # Répertoires
 FASTP_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/06_fastp"
-KRAKEN2_DB="/storage/biodatabanks/kraken2/nt_kraken2_db"
+KRAKEN2_DB="/home/plstenge/nt_kraken2_db"
 OUT_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/07_kraken2"
 THREADS=36
 
