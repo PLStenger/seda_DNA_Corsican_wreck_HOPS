@@ -34,6 +34,19 @@ conda activate kraken2
 
 cd /home/plstenge/nt_kraken2_db
 
+mkdir /home/plstenge/nt_kraken2_db_big
+cp /storage/biodatabanks/ncbi/NT/ncbi_blast_nt_2024-8-24/fasta/All/all.fasta /home/plstenge/nt_kraken2_db_big/
+echo "cp ok"
+
+kraken2-build --add-to-library /home/plstenge/nt_kraken2_db_big/all.fasta --db /home/plstenge/nt_kraken2_db_big
+echo "add-to-library ok"
+
+kraken2-build --download-taxonomy --db /home/plstenge/nt_kraken2_db_big
+echo "download-taxonomy ok"
+
+#kraken2-build --build --db /home/plstenge/nt_kraken2_db_big --threads 36
+echo "base de donnée construite"
+
 #kraken2-build --add-to-library /storage/biodatabanks/ncbi/NT/ncbi_blast_nt_2024-8-24/fasta/All/all.fasta --db /home/plstenge/nt_kraken2_db
 
 #echo "add-to-library ok"
@@ -43,6 +56,6 @@ cd /home/plstenge/nt_kraken2_db
 #echo "download-taxonomy ok"
 
 #kraken2-build --build --db /home/plstenge/nt_kraken2_db --threads 36
-kraken2-build --build --db /home/plstenge/nt_kraken2_db --threads 36 > build.log 2> build.err
+#kraken2-build --build --db /home/plstenge/nt_kraken2_db --threads 36 > build.log 2> build.err
 
-echo "base de donnée construite"
+#echo "base de donnée construite"
