@@ -9,8 +9,8 @@
 ##SBATCH -c 32
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL 
-#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/01_quality_check_by_FastQC.err"
-#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wrec_HOPSk/00_scripts/01_quality_check_by_FastQC.out"
+#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/99_fastqc_all_steps.err"
+#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wrec_HOPSk/00_scripts/99_fastqc_all_steps.out"
 
 # installing FastQC from https://www.bioinformatics.babraham.ac.uk/projects/download.html
 # FastQC v0.11.9 (Mac DMG image)
