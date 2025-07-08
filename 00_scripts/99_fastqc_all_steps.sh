@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #SBATCH --job-name=quality_check_by_FastQC
 ##SBATCH --time=24:00
 #SBATCH --ntasks=1
