@@ -123,7 +123,7 @@ conda deactivate
 ##############################################################################################################################
 
 WORKING_DIRECTORY=/home/plstenge/seda_DNA_Corsican_wreck_HOPS/06_fastp
-OUTPUT=/home/plstenge/seda_DNA_Corsican_wreck_HOPS/99_04_quality_check_fastp
+OUTPUT=/home/plstenge/seda_DNA_Corsican_wreck_HOPS/99_05_quality_check_fastp
 
 # Make the directory (mkdir) only if not existe already(-p)
 mkdir -p $OUTPUT
