@@ -59,6 +59,9 @@ do
         --overlap_diff_percent_limit 20 \
         --html "$HTML" \
         --json "$JSON" \
+        --adapter_sequence AATGATACGGCGACCACCGAGATCTACACNNNNNNNACACTCTTTCCCTACACGACGCTCTT \
+        --adapter_sequence_r2 CAAGCAGAAGACGGCATACGAGATNNNNNNNGTGACTGGAGTTCAGACGTGT \
+        --detect_adapter_for_pe \
         --thread 4
 
     echo "Traitement terminé pour $BASENAME"
