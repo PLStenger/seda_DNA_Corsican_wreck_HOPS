@@ -59,8 +59,8 @@ do
         --overlap_diff_percent_limit 20 \
         --html "$HTML" \
         --json "$JSON" \
-        --adapter_sequence AATGATACGGCGACCACCGAGATCTACAC \
-        --adapter_sequence_r2 CAAGCAGAAGACGGCATACGAGAT \
+        --adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+        --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
         --detect_adapter_for_pe \
         --thread 4
 
