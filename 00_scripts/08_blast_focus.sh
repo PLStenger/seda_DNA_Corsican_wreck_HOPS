@@ -15,19 +15,19 @@ OUTPUT_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/08_blast"
 # Création des dossiers de sortie si besoin
 mkdir -p "$OUTPUT_DIR"
 
- module load conda/4.12.0
- source ~/.bashrc
- conda activate bbduk
+# module load conda/4.12.0
+# source ~/.bashrc
+# conda activate bbduk
  
- REFORMAT=/home/plstenge/bbmap/reformat.sh
+# REFORMAT=/home/plstenge/bbmap/reformat.sh
  
- cd $INPUT_DIR
+# cd $INPUT_DIR
  
- gunzip clean_1121_sed8_rep1_dedup_clumpify_fastp_merged.fastq.gz 
- $REFORMAT in=$INPUT_DIR/clean_1121_sed8_rep1_dedup_clumpify_fastp_merged.fastq out=$OUTPUT_DIR/clean_1121_sed8_rep1_dedup_clumpify_fastp_merged.fa
+# gunzip clean_1121_sed8_rep1_dedup_clumpify_fastp_merged.fastq.gz 
+# $REFORMAT in=$INPUT_DIR/clean_1121_sed8_rep1_dedup_clumpify_fastp_merged.fastq out=$OUTPUT_DIR/clean_1121_sed8_rep1_dedup_clumpify_fastp_merged.fa
 
-  gunzip clean_1122_sed8_rep2_dedup_clumpify_fastp_merged.fastq.gz 
- $REFORMAT in=$INPUT_DIR/clean_1122_sed8_rep2_dedup_clumpify_fastp_merged.fastq out=$OUTPUT_DIR/clean_1122_sed8_rep2_dedup_clumpify_fastp_merged.fa
+ # gunzip clean_1122_sed8_rep2_dedup_clumpify_fastp_merged.fastq.gz 
+ # $REFORMAT in=$INPUT_DIR/clean_1122_sed8_rep2_dedup_clumpify_fastp_merged.fastq out=$OUTPUT_DIR/clean_1122_sed8_rep2_dedup_clumpify_fastp_merged.fa
  
 
 cd $OUTPUT_DIR
