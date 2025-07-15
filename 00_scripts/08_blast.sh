@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=05_fastp
+#SBATCH --job-name=08_blast
 #SBATCH --ntasks=1
 #SBATCH -p smp
 #SBATCH --mem=250G
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL 
-#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/05_fastp.err"
-#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/05_fastp.out"
+#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/08_blast.err"
+#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/08_blast.out"
 
 # Dossier contenant les fichiers fastq.gz
 INPUT_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/06_fastp"
