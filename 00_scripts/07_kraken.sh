@@ -12,9 +12,13 @@ module load conda/4.12.0
 source ~/.bashrc
 conda activate kraken2
 
+
+### Download Kraken database from https://benlangmead.github.io/aws-indexes/k2
+### k2_core_nt_20250609.tar.gz
+
 # Répertoires
 FASTP_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/06_fastp"
-KRAKEN2_DB="/home/plstenge/nt_kraken2_db"
+KRAKEN2_DB="/home/plstenge/k2_core_nt_20250609"
 OUT_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/07_kraken2"
 THREADS=36
 
