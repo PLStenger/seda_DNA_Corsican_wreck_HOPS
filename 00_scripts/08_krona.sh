@@ -5,8 +5,8 @@
 #SBATCH --mem=700G
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL 
-#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/07_kraken.err"
-#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/07_kraken.out"
+#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/08_krona.err"
+#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/08_krona.out"
 
 module load conda/4.12.0
 source ~/.bashrc
