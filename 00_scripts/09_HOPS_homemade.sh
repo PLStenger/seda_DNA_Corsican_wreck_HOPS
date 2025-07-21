@@ -20,6 +20,10 @@ FASTQ_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/06_fastp"
 DAMAGE_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/08_damage"
 mkdir -p $DAMAGE_DIR
 
+LOGFILE="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/09_HOPS_homemade_$(date +%Y%m%d_%H%M%S).txt"
+echo "Logging to $LOGFILE"
+echo "Script started at $(date)" | tee -a "$LOGFILE"
+
 #declare -A TAXONS=(
 #    ["Mammals"]="40674"
 #    ["Homo sapiens"]="9606"
