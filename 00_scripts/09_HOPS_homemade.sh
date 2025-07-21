@@ -48,7 +48,7 @@ for REPORT in $KRAKEN_DIR/*.report; do
         REF_FASTA="${TAXONS[$GROUP]#*:}"        # Récupère le chemin du génome après ':'
 
         echo "Extracting $GROUP ($TAX_ID) reads from $SAMPLE..."
-        python3 extract_kraken_reads.py \
+        python3 /home/plstenge/KrakenTools/extract_kraken_reads.py \
             -k $KRAKEN_DIR/${SAMPLE}.kraken \
             -s $FASTQ_DIR/${SAMPLE}_R1.fastq.gz \
             -s2 $FASTQ_DIR/${SAMPLE}_R2.fastq.gz \
