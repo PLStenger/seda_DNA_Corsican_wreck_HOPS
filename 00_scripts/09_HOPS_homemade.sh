@@ -74,7 +74,12 @@ for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
                 echo "======= Running damageprofiler for $GROUP from $PREFIX ======="
                 damageprofiler -i "${DAMAGE_DIR}/${PREFIX}_${GROUP}.bam" \
                     -r "$REF_FASTA" \
-                    -o "${DAMAGE_DIR}/${PREFIX}_${GROUP}_damage"
+                    -o "${DAMAGE_DIR}/${PREFIX}_${GROUP}_damage_profiler"
+
+                    # Ou, avec mapDamage2:
+            mapDamage -i "$DAMAGE_DIR/${PREFIX}_${GROUP}.bam" \
+                  -r "$REF_FASTA" \
+                  --folder "$DAMAGE_DIR/${PREFIX}_${GROUP}_mapDamage"
             fi
         fi
     done
