@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=07_kraken
+#SBATCH --job-name=09_HOPS_homemade
 #SBATCH --ntasks=1
 #SBATCH -p smp
 #SBATCH --mem=1000G
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL 
-#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/07_kraken.err"
-#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/07_kraken.out"
+#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/09_HOPS_homemade.err"
+#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/09_HOPS_homemade.out"
 
 module load conda/4.12.0
 source ~/.bashrc
