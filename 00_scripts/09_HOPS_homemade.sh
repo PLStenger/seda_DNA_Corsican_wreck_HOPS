@@ -37,41 +37,45 @@ declare -A TAXONS=(
     ["Vitis_vinifera"]="29760:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
 )
 
-# Pour chaque fichier Kraken (.report)
-for REPORT in $KRAKEN_DIR/*.report; do
-    SAMPLE=$(basename $REPORT .report)
-    SAMPLE=${SAMPLE%_*_*_*} # Simplification du nom de l'échantillon
-
-    # Pour chaque groupe taxonomique
+# Boucle sur TOUS les fichiers .kraken (pas .report !)
+for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
+    KRAKEN_BASE=$(basename "$KRAKEN_FILE" .kraken)
+    # On veut extraire le préfixe commun entre .kraken et .fastq.gz
+    # Ex: clean_1121_sed8_rep1_dedup_clumpify_unmerged.kraken → clean_1121_sed8_rep1
+    # Le préfixe est tout sauf _dedup_clumpify_unmerged ou _dedup_clumpify_merged
+    PREFIX=$(echo "$KRAKEN_BASE" | sed -E 's/_dedup_clumpify_(un)?merged$//')
+    R1_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R1.fastq.gz"
+    R2_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R2.fastq.gz"
+    
+    # Pour chaque taxon d'intérêt
     for GROUP in "${!TAXONS[@]}"; do
-        TAX_ID="${TAXONS[$GROUP]%:*}"           # Récupère le tax_id avant ':'
-        REF_FASTA="${TAXONS[$GROUP]#*:}"        # Récupère le chemin du génome après ':'
-
-        echo "Extracting $GROUP ($TAX_ID) reads from $SAMPLE..."
+        TAX_ID="${TAXONS[$GROUP]%:*}"
+        REF_FASTA="${TAXONS[$GROUP]#*:}"
+        
+        OUT_R1="${DAMAGE_DIR}/${PREFIX}_${GROUP}_R1.fastq"
+        OUT_R2="${DAMAGE_DIR}/${PREFIX}_${GROUP}_R2.fastq"
+        
+        echo "======= Extracting $GROUP reads from $KRAKEN_BASE ======="
         python3 /home/plstenge/KrakenTools/extract_kraken_reads.py \
-            -k $KRAKEN_DIR/${SAMPLE}.kraken \
-            -s $FASTQ_DIR/${SAMPLE}_R1.fastq.gz \
-            -s2 $FASTQ_DIR/${SAMPLE}_R2.fastq.gz \
-            -t $TAX_ID \
-            -o $DAMAGE_DIR/${SAMPLE}_${GROUP}_R1.fastq \
-            -o2 $DAMAGE_DIR/${SAMPLE}_${GROUP}_R2.fastq \
+            -k "$KRAKEN_FILE" \
+            -s "$R1_FILE" \
+            -s2 "$R2_FILE" \
+            -t "$TAX_ID" \
+            -o "$OUT_R1" \
+            -o2 "$OUT_R2" \
             --fastq-output
-
-        if [ -e $DAMAGE_DIR/${SAMPLE}_${GROUP}_R1.fastq ]; then
-            echo "Aligning $GROUP reads from $SAMPLE..."
-            bwa mem -t 4 $REF_FASTA \
-                $DAMAGE_DIR/${SAMPLE}_${GROUP}_R1.fastq \
-                $DAMAGE_DIR/${SAMPLE}_${GROUP}_R2.fastq > $DAMAGE_DIR/${SAMPLE}_${GROUP}.sam
-            samtools view -bS $DAMAGE_DIR/${SAMPLE}_${GROUP}.sam > $DAMAGE_DIR/${SAMPLE}_${GROUP}.bam
-        fi
-
-        # 3. Calculer le profil de dommage
-        if [ -e $DAMAGE_DIR/${SAMPLE}_${GROUP}.bam ]; then
-            echo "Running damage profile for $GROUP on $SAMPLE..."
-            damageprofiler -i $DAMAGE_DIR/${SAMPLE}_${GROUP}.bam \
-                  -r $REF_FASTA \
-                  -o $DAMAGE_DIR/${SAMPLE}_${GROUP}_damage
+        
+        if [[ -e "$OUT_R1" && -e "$OUT_R2" ]]; then
+            echo "======= Aligning $GROUP reads from $PREFIX ======="
+            bwa mem -t 4 "$REF_FASTA" "$OUT_R1" "$OUT_R2" > "${DAMAGE_DIR}/${PREFIX}_${GROUP}.sam"
+            samtools view -bS "${DAMAGE_DIR}/${PREFIX}_${GROUP}.sam" > "${DAMAGE_DIR}/${PREFIX}_${GROUP}.bam"
+            
+            if [[ -e "${DAMAGE_DIR}/${PREFIX}_${GROUP}.bam" ]]; then
+                echo "======= Running damageprofiler for $GROUP from $PREFIX ======="
+                damageprofiler -i "${DAMAGE_DIR}/${PREFIX}_${GROUP}.bam" \
+                    -r "$REF_FASTA" \
+                    -o "${DAMAGE_DIR}/${PREFIX}_${GROUP}_damage"
+            fi
         fi
     done
-done
 done
