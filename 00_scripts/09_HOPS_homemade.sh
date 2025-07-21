@@ -37,8 +37,10 @@ echo "Script started at $(date)" | tee -a "$LOGFILE"
 # Liste de groupes taxonomiques à analyser
 # Tableau associatif : taxon (clef) -> tax_id (valeur) -> génome de référence (chemin)
 declare -A TAXONS=(
-    ["Homo_sapiens"]="9606:/storage/biodatabanks/ucsc/genomes/hg19/Homo_sapiens-hg19_2012-9-19/fasta/all.fasta"
+    ["Homo_sapiens"]="9606:/storage/biodatabanks/ucsc/genomes/hg19/Homo_sapiens-hg19_2012-9-19/fasta/chr17.fa"
     ["Vitis_vinifera"]="29760:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
+    ["Triticum"]="4564:/storage/biodatabanks/ensembl/triticum_aestivum/current/fasta/all.fasta"
+    ["Magnoliopsida"]="3398:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
 )
 
 
