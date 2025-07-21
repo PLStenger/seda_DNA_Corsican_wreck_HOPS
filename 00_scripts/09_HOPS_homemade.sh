@@ -37,27 +37,39 @@ declare -A TAXONS=(
     ["Vitis_vinifera"]="29760:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
 )
 
+
+function log {
+    echo "$(date) -- $1" | tee -a "$LOGFILE"
+}
+
 for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
     KRAKEN_BASE=$(basename "$KRAKEN_FILE" .kraken)
-    # On NE SIMPLIFIE PAS le nom, car on traite merged et unmerged séparément
+    log "==== Processing file: $KRAKEN_FILE ===="
 
-    # On cherche les FASTQ correspondants au même nom (attention: ta nomenclature, il faut adapter!)
-    # Ex: clean_1121_sed8_rep1_dedup_clumpify_unmerged.kraken → utilise le même nom pour les FASTQ
-    R1_FILE="${FASTQ_DIR}/${KRAKEN_BASE}_R1.fastq.gz"
-    R2_FILE="${FASTQ_DIR}/${KRAKEN_BASE}_R2.fastq.gz"
-    MERGED_FILE="${FASTQ_DIR}/${KRAKEN_BASE}_merged.fastq.gz"  # Si tu as un merged FASTQ
+    # On garde tout le nom de base pour éviter tout problème
+    log "Base name for FASTQ search: $KRAKEN_BASE"
+    R1_FILE="$FASTQ_DIR/${KRAKEN_BASE}_R1.fastq.gz"
+    R2_FILE="$FASTQ_DIR/${KRAKEN_BASE}_R2.fastq.gz"
+    MERGED_FILE="$FASTQ_DIR/${KRAKEN_BASE}_merged.fastq.gz"
 
+    log "Looking for R1, R2, merged FASTQ:"
+    log "  R1: $R1_FILE"
+    log "  R2: $R2_FILE"
+    log "  merged: $MERGED_FILE"
+
+    # Pour chaque taxon d'intérêt
     for GROUP in "${!TAXONS[@]}"; do
         TAX_ID="${TAXONS[$GROUP]%:*}"
         REF_FASTA="${TAXONS[$GROUP]#*:}"
+        log "--- Processing taxon: $GROUP (taxid: $TAX_ID) ---"
 
-        OUT_R1="${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R1.fastq"
-        OUT_R2="${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R2.fastq"
-        OUT_MERGED="${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.fastq"
+        OUT_R1="$DAMAGE_DIR/${KRAKEN_BASE}_${GROUP}_R1.fastq"
+        OUT_R2="$DAMAGE_DIR/${KRAKEN_BASE}_${GROUP}_R2.fastq"
+        OUT_MERGED="$DAMAGE_DIR/${KRAKEN_BASE}_${GROUP}_merged.fastq"
 
-        echo "======= Extracting $GROUP reads from $KRAKEN_BASE ======="
-        # Extraction pour les paires
+        # Extraction pour les paires (unmerged)
         if [[ -f "$R1_FILE" && -f "$R2_FILE" ]]; then
+            log "Extracting reads for $GROUP from $KRAKEN_BASE (unmerged pairs)..."
             python3 /home/plstenge/KrakenTools/extract_kraken_reads.py \
                 -k "$KRAKEN_FILE" \
                 -s "$R1_FILE" \
@@ -67,38 +79,43 @@ for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
                 -o2 "$OUT_R2" \
                 --fastq-output
 
-            # ALIGNEMENT BWA ALN (ADN ancien)
             if [[ -f "$OUT_R1" && -f "$OUT_R2" ]]; then
-                echo "======= Aligning $GROUP reads (unmerged) from $KRAKEN_BASE (bwa aln/sampe) ======="
-                bwa aln -t 4 "$REF_FASTA" "$OUT_R1" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R1.sai"
-                bwa aln -t 4 "$REF_FASTA" "$OUT_R2" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R2.sai"
+                log "Read extraction OK. Files present: $OUT_R1, $OUT_R2"
+                log "Aligning for $GROUP (unmerged pairs) using bwa aln/sampe..."
+                bwa aln -t 4 "$REF_FASTA" "$OUT_R1" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R1.sai" 2>>"$LOGFILE"
+                bwa aln -t 4 "$REF_FASTA" "$OUT_R2" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R2.sai" 2>>"$LOGFILE"
                 bwa sampe "$REF_FASTA" \
                     "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R1.sai" \
                     "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R2.sai" \
                     "$OUT_R1" \
-                    "$OUT_R2" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sam"
-                samtools view -bS "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sam" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.bam"
-                samtools sort -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.bam"
-                samtools index "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam"
-                rm "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R1.sai" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R2.sai"
+                    "$OUT_R2" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sam" 2>>"$LOGFILE"
+                samtools view -bS "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sam" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.bam" 2>>"$LOGFILE"
+                samtools sort -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.bam" 2>>"$LOGFILE"
+                samtools index "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam" 2>>"$LOGFILE"
+                rm "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R1.sai" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_R2.sai" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sam" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.bam" 2>>"$LOGFILE"
+                
+                log "Alignment OK. BAM: ${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam"
 
-                # DAMAGE PROFILING
                 if [[ -f "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam" ]]; then
-                    echo "======= Running damageprofiler for $GROUP (unmerged) ======="
+                    log "Running damageprofiler for $GROUP (unmerged pairs)..."
                     damageprofiler -i "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam" \
                         -r "$REF_FASTA" \
-                        -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_damageprofiler_unmerged"
-
-                    echo "======= Running mapDamage for $GROUP (unmerged) ======="
+                        -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_damageprofiler_unmerged" 2>>"$LOGFILE"
+                    log "Running mapDamage for $GROUP (unmerged pairs)..."
                     mapDamage -i "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}.sorted.bam" \
                         -r "$REF_FASTA" \
-                        --folder "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_mapDamage_unmerged"
+                        --folder "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_mapDamage_unmerged" 2>>"$LOGFILE"
+                else
+                    log "FATAL: BAM file not generated."
                 fi
+            else
+                log "WARNING: Extraction failed for ${KRAKEN_BASE}_${GROUP} (unmerged pairs). Files missing?"
             fi
         fi
 
-        # Extraction pour les merged
+        # Extraction pour les merged reads (single-end)
         if [[ -f "$MERGED_FILE" ]]; then
+            log "Extracting reads for $GROUP from $KRAKEN_BASE (merged)..."
             python3 /home/plstenge/KrakenTools/extract_kraken_reads.py \
                 -k "$KRAKEN_FILE" \
                 -s "$MERGED_FILE" \
@@ -106,31 +123,37 @@ for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
                 -o "$OUT_MERGED" \
                 --fastq-output
 
-            # ALIGNEMENT BWA ALN sur merged (single-end)
             if [[ -f "$OUT_MERGED" ]]; then
-                echo "======= Aligning $GROUP reads (merged) from $KRAKEN_BASE (bwa aln/samse) ======="
-                bwa aln -t 4 "$REF_FASTA" "$OUT_MERGED" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sai"
+                log "Read extraction OK (merged). File present: $OUT_MERGED"
+                log "Aligning for $GROUP (merged) using bwa aln/samse..."
+                bwa aln -t 4 "$REF_FASTA" "$OUT_MERGED" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sai" 2>>"$LOGFILE"
                 bwa samse "$REF_FASTA" \
                     "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sai" \
-                    "$OUT_MERGED" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sam"
-                samtools view -bS "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sam" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.bam"
-                samtools sort -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.bam"
-                samtools index "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam"
-                rm "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sai"
+                    "$OUT_MERGED" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sam" 2>>"$LOGFILE"
+                samtools view -bS "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sam" > "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.bam" 2>>"$LOGFILE"
+                samtools sort -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.bam" 2>>"$LOGFILE"
+                samtools index "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam" 2>>"$LOGFILE"
+                rm "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sai" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sam" "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.bam" 2>>"$LOGFILE"
+                
+                log "Alignment OK (merged). BAM: ${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam"
 
-                # DAMAGE PROFILING sur merged
                 if [[ -f "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam" ]]; then
-                    echo "======= Running damageprofiler for $GROUP (merged) ======="
+                    log "Running damageprofiler for $GROUP (merged)..."
                     damageprofiler -i "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam" \
                         -r "$REF_FASTA" \
-                        -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_damageprofiler_merged"
-
-                    echo "======= Running mapDamage for $GROUP (merged) ======="
+                        -o "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_damageprofiler_merged" 2>>"$LOGFILE"
+                    log "Running mapDamage for $GROUP (merged)..."
                     mapDamage -i "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.sorted.bam" \
                         -r "$REF_FASTA" \
-                        --folder "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_mapDamage_merged"
+                        --folder "${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_mapDamage_merged" 2>>"$LOGFILE"
+                else
+                    log "FATAL: BAM file not generated (merged)."
                 fi
+            else
+                log "WARNING: Extraction failed for ${KRAKEN_BASE}_${GROUP} (merged). File missing?"
             fi
         fi
     done
 done
+
+log "Script finished at $(date)"
