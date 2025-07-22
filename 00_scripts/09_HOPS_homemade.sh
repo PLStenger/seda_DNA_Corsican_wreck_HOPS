@@ -10,7 +10,8 @@
 
 module load conda/4.12.0
 source ~/.bashrc
-conda activate hops
+#conda activate hops
+conda activate mapdamage_py39
 
 # Dossier contenant les fichiers Kraken2
 KRAKEN_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/07_kraken2"
