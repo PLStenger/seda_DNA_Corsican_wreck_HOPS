@@ -48,41 +48,44 @@ declare -A TAXONS=(
 touch "$LOGFILE"
 echo "Logging to $LOGFILE" | tee -a "$LOGFILE"
 
+# Important: active nullglob pour éviter les tableaux vides
+shopt -s nullglob
+
 for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
     KRAKEN_BASE=$(basename "$KRAKEN_FILE" .kraken)
     echo -e "\n==== Processing file: $KRAKEN_FILE ====" | tee -a "$LOGFILE"
 
-    # Extraire le préfixe FASTQ avant _dedup_clumpify_unmerged ou _dedup_clumpify_merged
+    # Extraction du préfixe FASTQ
     PREFIX=$(echo "$KRAKEN_BASE" | sed -E 's/_dedup_clumpify_(un)?merged$//')
     echo "Prefix for FASTQ search: $PREFIX" | tee -a "$LOGFILE"
 
- # R1
-R1_FILE=$(ls "${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R1.fastq"* 2>/dev/null | head -1)
-if [[ -z "$R1_FILE" ]]; then
-    echo "WARNING: No R1 file found for $PREFIX" | tee -a "$LOGFILE"
-else
-    echo "Found R1: $R1_FILE" | tee -a "$LOGFILE"
-fi
+    # Recherche des fichiers R1, R2, merged (.fastq ou .fastq.gz)
+    R1_FILES=("${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R1.fastq"*)
+    if [[ -f "${R1_FILES[0]}" ]]; then
+        R1_FILE="${R1_FILES[0]}"
+        echo "Found R1: $R1_FILE" | tee -a "$LOGFILE"
+    else
+        R1_FILE=""
+        echo "WARNING: No R1 file found for $PREFIX" | tee -a "$LOGFILE"
+    fi
 
-# R2
-R2_FILE=$(ls "${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R2.fastq"* 2>/dev/null | head -1)
-if [[ -z "$R2_FILE" ]]; then
-    echo "WARNING: No R2 file found for $PREFIX" | tee -a "$LOGFILE"
-else
-    echo "Found R2: $R2_FILE" | tee -a "$LOGFILE"
-fi
+    R2_FILES=("${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R2.fastq"*)
+    if [[ -f "${R2_FILES[0]}" ]]; then
+        R2_FILE="${R2_FILES[0]}"
+        echo "Found R2: $R2_FILE" | tee -a "$LOGFILE"
+    else
+        R2_FILE=""
+        echo "WARNING: No R2 file found for $PREFIX" | tee -a "$LOGFILE"
+    fi
 
-# Merged
-MERGED_FILE=$(ls "${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_merged.fastq"* 2>/dev/null | head -1)
-if [[ -z "$MERGED_FILE" ]]; then
-    echo "WARNING: No merged file found for $PREFIX" | tee -a "$LOGFILE"
-else
-    echo "Found merged: $MERGED_FILE" | tee -a "$LOGFILE"
-fi
-
-    echo "Looking for R1: $R1_FILE" | tee -a "$LOGFILE"
-    echo "Looking for R2: $R2_FILE" | tee -a "$LOGFILE"
-    echo "Looking for merged: $MERGED_FILE" | tee -a "$LOGFILE"
+    MERGED_FILES=("${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_merged.fastq"*)
+    if [[ -f "${MERGED_FILES[0]}" ]]; then
+        MERGED_FILE="${MERGED_FILES[0]}"
+        echo "Found merged: $MERGED_FILE" | tee -a "$LOGFILE"
+    else
+        MERGED_FILE=""
+        echo "WARNING: No merged file found for $PREFIX" | tee -a "$LOGFILE"
+    fi
 
     for GROUP in "${!TAXONS[@]}"; do
         TAX_ID="${TAXONS[$GROUP]%:*}"
@@ -94,7 +97,7 @@ fi
         OUT_MERGED="${DAMAGE_DIR}/${KRAKEN_BASE}_${GROUP}_merged.fastq"
 
         # Extraction pour reads appariés (unmerged)
-        if [[ -f "$R1_FILE" && -f "$R2_FILE" ]]; then
+        if [[ -n "$R1_FILE" && -n "$R2_FILE" ]]; then
             echo "Extracting reads for $GROUP (unmerged pairs)..." | tee -a "$LOGFILE"
             python3 /home/plstenge/KrakenTools/extract_kraken_reads.py \
                 -k "$KRAKEN_FILE" -s "$R1_FILE" -s2 "$R2_FILE" -t "$TAX_ID" \
@@ -115,10 +118,12 @@ fi
             else
                 echo "WARNING: Missing output FASTQ files for $GROUP unmerged pairs" | tee -a "$LOGFILE"
             fi
+        else
+            echo "Skipping unmerged pairs for $GROUP: no input files found" | tee -a "$LOGFILE"
         fi
 
         # Extraction pour reads merged
-        if [[ -f "$MERGED_FILE" ]]; then
+        if [[ -n "$MERGED_FILE" ]]; then
             echo "Extracting reads for $GROUP (merged)..." | tee -a "$LOGFILE"
             python3 /home/plstenge/KrakenTools/extract_kraken_reads.py \
                 -k "$KRAKEN_FILE" -s "$MERGED_FILE" -t "$TAX_ID" -o "$OUT_MERGED" --fastq-output 2>>"$LOGFILE"
@@ -137,6 +142,8 @@ fi
             else
                 echo "WARNING: Missing output FASTQ file for $GROUP merged" | tee -a "$LOGFILE"
             fi
+        else
+            echo "Skipping merged for $GROUP: no input file found" | tee -a "$LOGFILE"
         fi
     done
 done
