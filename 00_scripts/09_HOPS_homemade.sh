@@ -56,9 +56,29 @@ for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
     PREFIX=$(echo "$KRAKEN_BASE" | sed -E 's/_dedup_clumpify_(un)?merged$//')
     echo "Prefix for FASTQ search: $PREFIX" | tee -a "$LOGFILE"
 
-    R1_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R1.fastq*"
-    R2_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R2.fastq*"
-    MERGED_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_merged.fastq*"
+ # R1
+R1_FILE=$(ls "${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R1.fastq"* 2>/dev/null | head -1)
+if [[ -z "$R1_FILE" ]]; then
+    echo "WARNING: No R1 file found for $PREFIX" | tee -a "$LOGFILE"
+else
+    echo "Found R1: $R1_FILE" | tee -a "$LOGFILE"
+fi
+
+# R2
+R2_FILE=$(ls "${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R2.fastq"* 2>/dev/null | head -1)
+if [[ -z "$R2_FILE" ]]; then
+    echo "WARNING: No R2 file found for $PREFIX" | tee -a "$LOGFILE"
+else
+    echo "Found R2: $R2_FILE" | tee -a "$LOGFILE"
+fi
+
+# Merged
+MERGED_FILE=$(ls "${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_merged.fastq"* 2>/dev/null | head -1)
+if [[ -z "$MERGED_FILE" ]]; then
+    echo "WARNING: No merged file found for $PREFIX" | tee -a "$LOGFILE"
+else
+    echo "Found merged: $MERGED_FILE" | tee -a "$LOGFILE"
+fi
 
     echo "Looking for R1: $R1_FILE" | tee -a "$LOGFILE"
     echo "Looking for R2: $R2_FILE" | tee -a "$LOGFILE"
