@@ -56,9 +56,9 @@ for KRAKEN_FILE in "$KRAKEN_DIR"/*.kraken; do
     PREFIX=$(echo "$KRAKEN_BASE" | sed -E 's/_dedup_clumpify_(un)?merged$//')
     echo "Prefix for FASTQ search: $PREFIX" | tee -a "$LOGFILE"
 
-    R1_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R1.fastq.gz"
-    R2_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R2.fastq.gz"
-    MERGED_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_merged.fastq.gz"
+    R1_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R1.fastq*"
+    R2_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_R2.fastq*"
+    MERGED_FILE="${FASTQ_DIR}/${PREFIX}_dedup_clumpify_fastp_merged.fastq*"
 
     echo "Looking for R1: $R1_FILE" | tee -a "$LOGFILE"
     echo "Looking for R2: $R2_FILE" | tee -a "$LOGFILE"
