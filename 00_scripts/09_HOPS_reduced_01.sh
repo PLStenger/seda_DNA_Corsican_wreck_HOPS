@@ -8,7 +8,7 @@
 #SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/09_HOPS_reduced_01.err"
 #SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/09_HOPS_reduced_01.out"
 
-set -euo pipefail
+#set -euo pipefail
 
 KR_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/07_kraken2"
 OUT_DIR="/home/plstenge/custom_nt_hopped"
