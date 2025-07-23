@@ -41,23 +41,15 @@ cd $OUT_DIR
 ### 2. Extraire les taxons détectés par Kraken2 (tous les rangs)
 # Concatenation de tous les fichiers .report
 # Extraction des taxIDs (script Python rapide)
-cat ${KR_DIR}/*.report > all_kraken_reports.txt
+#cat ${KR_DIR}/*.report > all_kraken_reports.txt
 
-# python3 -c "
-# import sys
-# taxids = set()
-# with open('all_kraken_reports.txt') as f:
-#     for line in f:
-#         if line.startswith('  '):
-#             taxid = line.strip().split('\t')[-3]
-#             if taxid.isdigit():
-#                 taxids.add(taxid)
-# with open('detected_taxids.txt', 'w') as out:
-#     out.write('\n'.join(taxids))
-# "
+
 
 # Script python marche pas, donc:
-awk -F"\t" '{if($5 ~ /^[0-9]+$/) print $5}' all_kraken_reports.txt | sort -u > detected_taxids.txt
+#awk -F"\t" '{if($5 ~ /^[0-9]+$/) print $5}' all_kraken_reports.txt | sort -u > detected_taxids.txt
+
+### A SUPPRIMER PLUS TARD
+awk 'NR==FNR{a[$1];next} ($1 in a)' all_accessions.txt ${ACC2TAXID} > filtered_accession2taxid.txt
 
 # Filtrer le mapping accession2taxid pour ne garder que nos taxons
 # Convertir le mapping en {taxid: [accession1, accession2, ...]}
