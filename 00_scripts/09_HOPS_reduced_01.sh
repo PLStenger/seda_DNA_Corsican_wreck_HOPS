@@ -12,7 +12,7 @@
 
 KR_DIR="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/07_kraken2"
 OUT_DIR="/home/plstenge/custom_nt_hopped"
-# ACC2TAXID="/home/plstenge/custom_nt_hopped/nucl_gb.accession2taxid" # Fichier accession2taxid (NCBI)
+ACC2TAXID="/home/plstenge/custom_nt_hopped/nucl_gb.accession2taxid"
 
 module load conda/4.12.0
 source ~/.bashrc
