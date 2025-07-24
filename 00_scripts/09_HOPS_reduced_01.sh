@@ -47,12 +47,11 @@ cd $OUT_DIR
 
 # Filtrer le mapping accession2taxid pour ne garder que nos taxons
 # Convertir le mapping en {taxid: [accession1, accession2, ...]}
-#awk 'NR==FNR{a[$3]=a[$3] FS $1; next} ($1 in a){print $0}' detected_taxids.txt filtered_accession2taxid.txt > final_accession2taxid.txt
-awk -F"\t" 'NR==FNR{a[$1]; next} ($3 in a)' detected_taxids.txt filtered_accession2taxid.txt > final_accession2taxid.txt
+#awk -F"\t" 'NR==FNR{a[$1]; next} ($3 in a)' detected_taxids.txt filtered_accession2taxid.txt > final_accession2taxid.txt
 
 # Extraire les lignes de all.fasta qui correspondent à nos accessions filtrées
 # Liste des accessions à garder
-cut -f1 final_accession2taxid.txt | sort -u > selected_accessions.txt
+#cut -f1 final_accession2taxid.txt | sort -u > selected_accessions.txt
 
 # Créer un fasta filtré (sélectionne les séquences correspondantes)
 python3 -c "
