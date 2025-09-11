@@ -21,6 +21,8 @@ OUTDIR=/home/plstenge/seda_DNA_Corsican_wreck_HOPS/11_metaDMG
 
 mkdir -p "$OUTDIR"
 
+# NE FAIRE QU UNE FOIS:
+bowtie2-build /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta /home/plstenge/refmetagenome
 
 for fqmerged in $WORKDIR/*_merged.fastq*; do
   BASENAME=$(basename "$fqmerged" _dedup_clumpify_fastp_merged.fastq)
