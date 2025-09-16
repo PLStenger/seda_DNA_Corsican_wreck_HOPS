@@ -15,9 +15,35 @@ conda activate metaDMG
 
 #bowtie2-build /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta /home/plstenge/refmetagenome
 
+input_fasta="/storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta"
+output_fasta="/storage/scratch/plstenge/all_NT_hpc2_filtered.fasta"
+
+awk '
+BEGIN {RS=">"; ORS=""} 
+NR>1 {
+  header = substr($1, 1, index($1, "\n")-1)
+  seq = substr($1, index($1, "\n")+1)
+  gsub("\n", "", seq)
+  # Remove gaps and Ns
+  filtered = seq
+  gsub("[-Nn]", "", filtered)
+  # If after removing gaps and Ns there is at least one nucleotide left, print sequence
+  if(length(filtered) > 0) {
+    print ">" header "\n"
+    # Print sequence in lines of 60 characters maximum
+    for(i=1; i<=length(seq); i+=60) {
+      print substr(seq, i, 60) "\n"
+    }
+  }
+}
+' $input_fasta > $output_fasta
+
+echo "Filtered FASTA saved to $output_fasta"
+
+
 # Adapter le chemin selon la disponibilité du scratch
 SCRATCHDIR=/storage/scratch/plstenge/bowtie2_nt_index
 mkdir -p $SCRATCHDIR
 
-bowtie2-build --large-index /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta $SCRATCHDIR/refmetagenome
+bowtie2-build --large-index $output_fasta $SCRATCHDIR/refmetagenome
 # => Les fichiers $SCRATCHDIR/refmetagenome.*.bt2*
