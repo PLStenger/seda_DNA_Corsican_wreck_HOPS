@@ -13,4 +13,11 @@ module load conda/4.12.0
 source ~/.bashrc
 conda activate metaDMG
 
-bowtie2-build /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta /home/plstenge/refmetagenome
+#bowtie2-build /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta /home/plstenge/refmetagenome
+
+# Adapter le chemin selon la disponibilité du scratch
+SCRATCHDIR=/storage/scratch/plstenge/bowtie2_nt_index
+mkdir -p $SCRATCHDIR
+
+bowtie2-build --large-index /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta $SCRATCHDIR/refmetagenome
+# => Les fichiers $SCRATCHDIR/refmetagenome.*.bt2*
