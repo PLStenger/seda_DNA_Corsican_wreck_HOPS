@@ -16,7 +16,7 @@ conda activate metaDMG
 #bowtie2-build /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta /home/plstenge/refmetagenome
 
 input_fasta="/storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta"
-output_fasta="/storage/scratch/plstenge/all_NT_hpc2_filtered.fasta"
+output_fasta="/home/plstenge/all_NT_hpc2_filtered_for_bowtie2.fasta"
 
 awk '
 BEGIN {RS=">"; ORS=""} 
@@ -42,7 +42,7 @@ echo "Filtered FASTA saved to $output_fasta"
 
 
 # Adapter le chemin selon la disponibilité du scratch
-SCRATCHDIR=/storage/scratch/plstenge/bowtie2_nt_index
+SCRATCHDIR=/home/plstenge/bowtie2_nt_index
 mkdir -p $SCRATCHDIR
 
 bowtie2-build --large-index $output_fasta $SCRATCHDIR/refmetagenome
