@@ -15,14 +15,11 @@ source ~/.bashrc
 conda activate metaDMG
 
 WORKDIR=/home/plstenge/seda_DNA_Corsican_wreck_HOPS/06_fastp
-REFIDX=/home/plstenge/refmetagenome
+REFIDX=/home/plstenge/bowtie2_nt_index
 TAXDIR=/home/plstenge/ncbi_tax_dmp
 OUTDIR=/home/plstenge/seda_DNA_Corsican_wreck_HOPS/11_metaDMG
 
 mkdir -p "$OUTDIR"
-
-# NE FAIRE QU UNE FOIS:
-bowtie2-build /storage/biodatabanks/ncbi/NT/current/fasta/All/all.fasta /home/plstenge/refmetagenome
 
 for fqmerged in $WORKDIR/*_merged.fastq*; do
   BASENAME=$(basename "$fqmerged" _dedup_clumpify_fastp_merged.fastq)
