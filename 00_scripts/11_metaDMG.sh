@@ -2,8 +2,8 @@
 #SBATCH --job-name=11_metaDMG
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=36
-#SBATCH -p smp
-#SBATCH --mem=500G
+#SBATCH -p long
+#SBATCH --mem=90G
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL
 #SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_HOPS/00_scripts/11_metaDMG.err"
